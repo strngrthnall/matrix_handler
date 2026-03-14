@@ -1,0 +1,12 @@
+[package]
+name = "matrix_handler"
+version = "0.1.0"
+edition = "2024"
+authors = ["Marcos Vinicius <viniciusrm.marcos@gmail.com"]
+description = "Uma crate para criação e manipulação de matrizes genéricas em Rust"
+license = "MIT"
+readme = "README.md"
+keywords = ["matrix", "linear-algebra", "math"]
+categories = ["mathematics", "data-structures"]
+
+[dependencies]
