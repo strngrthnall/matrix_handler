@@ -48,6 +48,8 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 
 ### Adicionando ao seu projeto
 
+O projeto ainda vai ser carregado ao crates.io, por enquanto para utilizar deve-se baixar e inserir o arquivo ao seu projeto.
+
 ```toml
 [dependencies]
 matrix_handler = "0.1.0"
