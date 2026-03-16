@@ -105,6 +105,50 @@ let float_matrix = Matrix::new(2, 2, vec![1.0, 2.5, 3.7, 4.2]).unwrap();
 let str_matrix = Matrix::new(1, 3, vec!["a", "b", "c"]).unwrap();
 ```
 
+### Soma de matrizes
+
+```rust
+use matrix_handler::{Matrix, MatrixMath};
+
+let a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+let b = Matrix::new(2, 2, vec![10, 20, 30, 40]).unwrap();
+
+// Via operador
+let c = &a + &b;
+assert_eq!(c[(0, 0)], 11);
+
+// Via método seguro (valida dimensões)
+let c = a.try_add(&b).unwrap();
+assert_eq!(c[(1, 1)], 44);
+
+// In-place (sem alocação extra)
+let mut a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+a += &b;
+assert_eq!(a[(0, 1)], 22);
+```
+
+### Subtração de matrizes
+
+```rust
+use matrix_handler::{Matrix, MatrixMath};
+
+let a = Matrix::new(2, 2, vec![10, 20, 30, 40]).unwrap();
+let b = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+
+// Via operador
+let c = &a - &b;
+assert_eq!(c[(0, 0)], 9);
+
+// Via método seguro (valida dimensões)
+let c = a.try_sub(&b).unwrap();
+assert_eq!(c[(1, 1)], 36);
+
+// In-place (sem alocação extra)
+let mut a = Matrix::new(2, 2, vec![10, 20, 30, 40]).unwrap();
+a -= &b;
+assert_eq!(a[(0, 1)], 18);
+```
+
 ## Arquitetura
 
 ```text
@@ -115,8 +159,10 @@ matrix_handler/
 ├── src/
 │   └── lib.rs              # Código principal: Matrix<T>, MatrixError
 └── tests/
-    ├── matrix_creation.rs  # Testes de criação e validação
-    └── matrix_reading.rs   # Testes de indexação e leitura
+    ├── matrix_creation.rs    # Testes de criação e validação
+    ├── matrix_math.rs        # Testes de soma e subtração
+    ├── matrix_mutability.rs  # Testes de indexação mutável
+    └── matrix_reading.rs     # Testes de indexação e leitura
 ```
 
 ### Decisões de design
@@ -136,6 +182,8 @@ Saída esperada:
 
 ```text
 running 3 tests ... ok    # matrix_creation
+running 4 tests ... ok    # matrix_math
+running 2 tests ... ok    # matrix_mutability
 running 4 tests ... ok    # matrix_reading
 ```
 
