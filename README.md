@@ -36,8 +36,8 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 | Criação de matrizes genéricas (`Matrix<T>`) | ✅ Implementado |
 | Validação de dimensões na construção | ✅ Implementado |
 | Indexação por `(linha, coluna)` | ✅ Implementado |
-| Adição de matrizes (`Add` / `AddAssign`) | 🔜 Em breve |
-| Subtração de matrizes | 🔜 Em breve |
+| Adição de matrizes (`Add` / `AddAssign`) | ✅ Implementado |
+| Subtração de matrizes | ✅ Implementado |
 | Multiplicação escalar | 🔜 Em breve |
 | Multiplicação matricial | 🔜 Em breve |
 | Transposição | 🔜 Em breve |
