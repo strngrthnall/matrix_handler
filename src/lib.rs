@@ -497,8 +497,6 @@ pub trait MatrixMath<Rhs = Self> {
     /// Retorna [`MatrixError::DimensionMismatch`] se as matrizes possuírem
     /// dimensões diferentes.
     fn try_sub(self, rhs: Rhs) -> Result<Self::Output, Self::Error>;
-
-    fn try_mul(self, rhs: Rhs) -> Result<Self::Output, Self::Error>;
     
 }
 
@@ -507,7 +505,7 @@ pub trait MatrixMath<Rhs = Self> {
 /// Requer que `T` implemente `Add`, `Sub` e `Copy`.
 impl<T> MatrixMath<&Matrix<T>> for &Matrix<T> 
 where 
-    T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy
+    T: Add<Output = T> + Sub<Output = T> + Copy 
 {
     type Output = Matrix<T>;
     type Error = MatrixError;
@@ -518,10 +516,6 @@ where
 
     fn try_sub(self, rhs: &Matrix<T>) -> Result<Matrix<T>, MatrixError> {
         self.try_elementwise_op(rhs, |a, b| a - b)
-    }
-
-    fn try_mul(self, rhs: &Matrix<T>) -> Result<Self::Output, Self::Error> {
-        self.try_elementwise_op(rhs, |a, b| a * b)
     }
 }
 
