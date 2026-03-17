@@ -90,7 +90,7 @@ mod matrix_math{
 
 
     #[test]
-    #[should_panic(expected = "assertion failed")]
+    #[should_panic(expected = "assertion `left == right` failed")]
     fn bad_matrix_multiplication() {
         let m1 = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
         let m2 = Matrix::new(3, 2, vec![1, 2, 3, 4, 5, 6]).unwrap();

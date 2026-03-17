@@ -39,7 +39,7 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 | Adição de matrizes (`Add` / `AddAssign`) | ✅ Implementado |
 | Subtração de matrizes | ✅ Implementado |
 | Multiplicação matricial | ✅ Implementado |
-| Multiplicação escalar | 🔜 Em breve |
+| Multiplicação escalar | ✅ Implementado |
 | Transposição | 🔜 Em breve |
 | Iteradores (linhas / colunas) | 🔜 Em breve |
 | `Display` formatado | 🔜 Em breve |

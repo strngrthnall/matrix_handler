@@ -33,15 +33,16 @@
 //! - **Subtração**: `&a - &b` (operador) ou `a.try_sub(&b)` (com validação de dimensões).
 //! - **Operações in-place**: `a += &b` e `a -= &b` sem alocação extra.
 //! - **Multiplicação matricial**: `a * &b` para produto de matrizes compatíveis.
+//! - **Multiplicação escalar**: `&a * k` (operador) ou `a *= k` (in-place).
+//! - **Multiplicação matricial in-place**: `a *= &b` sem criar nova matriz.
 //!
 //! ## Roadmap
 //!
-//! - Multiplicação escalar
 //! - Transposição
 //! - Iteradores sobre linhas e colunas
 //! - `Display` formatado
 
-use std::ops::{Add, AddAssign, Index, IndexMut, Mul, Sub, SubAssign};
+use std::{ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign}, process::Output};
 
 /// Erros que podem ocorrer durante operações com matrizes.
 ///
@@ -421,7 +422,10 @@ impl<T> SubAssign<&Matrix<T>> for Matrix<T> where T: SubAssign<T> + Copy {
 /// assert_eq!(c[(1, 0)], 139);
 /// assert_eq!(c[(1, 1)], 154);
 /// ```
-impl<T> Mul<&Matrix<T>> for Matrix<T> where T: Mul<Output = T> + AddAssign + Copy + Default {
+impl<T> Mul<&Matrix<T>> for Matrix<T> 
+where 
+    T: Mul<Output = T> + AddAssign + Copy + Default 
+{
     type Output = Matrix<T>;
     
     fn mul(self, rhs: &Matrix<T>) -> Self::Output {
@@ -450,6 +454,130 @@ impl<T> Mul<&Matrix<T>> for Matrix<T> where T: Mul<Output = T> + AddAssign + Cop
             columns: rhs.columns,
             values: result_values
         }
+
+    }
+}
+
+
+/// Multiplicação matricial in-place via operador `*=`.
+///
+/// Modifica `self` diretamente com o resultado do produto `self × rhs`,
+/// evitando a criação de uma nova matriz.
+///
+/// # Panics
+///
+/// Entra em pânico se `self.columns != rhs.lines` (matrizes incompatíveis
+/// para multiplicação).
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let mut a = Matrix::new(2, 3, vec![
+///     1, 2, 3,
+///     4, 5, 6,
+/// ]).unwrap();
+///
+/// let b = Matrix::new(3, 2, vec![
+///     7, 8,
+///     9, 10,
+///     11, 12,
+/// ]).unwrap();
+///
+/// a *= &b;
+/// // a agora é 2×2:
+/// // [ 1*7+2*9+3*11, 1*8+2*10+3*12 ]   [ 58,  64 ]
+/// // [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
+/// assert_eq!(a[(0, 0)], 58);
+/// assert_eq!(a[(1, 1)], 154);
+/// ```
+impl<T> MulAssign<&Matrix<T>> for Matrix<T> 
+where 
+    T: Mul<Output = T> + AddAssign + Copy + Default 
+{
+    
+    fn mul_assign(&mut self, rhs: &Matrix<T>) {
+        assert_eq!(self.columns, rhs.lines);
+
+        let mut result_values = vec![T::default(); self.lines * rhs.columns ];
+
+        for i in 0..self.lines {
+            for j in 0..rhs.columns {
+                let mut value_buffer = T::default();
+
+                for k in 0..self.columns {
+                    let a_idx = i * self.columns + k; 
+                    let b_idx = k * rhs.columns + j;
+
+                    value_buffer += self.values[a_idx] * rhs.values[b_idx];
+                }
+
+                result_values[i * rhs.columns + j] = value_buffer
+
+            }
+        }
+
+        self.columns = rhs.columns;
+        self.values = result_values;
+
+
+    }
+}
+
+
+
+/// Multiplicação escalar via operador `*`.
+///
+/// Permite a sintaxe `&a * k`, onde a referência é consumida e uma nova
+/// [`Matrix<T>`] é produzida com cada elemento multiplicado pelo escalar.
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+///
+/// let b = &a * 3;
+/// assert_eq!(b[(0, 0)], 3);
+/// assert_eq!(b[(1, 1)], 12);
+/// ```
+impl<T> Mul<T> for &Matrix<T> where T: Mul<Output = T> + Copy {
+    type Output = Matrix<T>;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        let val = self.values.iter().map(|&x| x * rhs).collect();
+        
+        Matrix {
+            lines: self.lines,
+            columns: self.columns,
+            values: val
+        }
+    }
+}
+
+
+/// Multiplicação escalar in-place via operador `*=`.
+///
+/// Modifica `self` diretamente multiplicando cada elemento pelo escalar,
+/// evitando alocação de uma nova matriz.
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let mut a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+///
+/// a *= 3;
+/// assert_eq!(a[(0, 0)], 3);
+/// assert_eq!(a[(1, 1)], 12);
+/// ```
+impl<T> MulAssign<T> for Matrix<T> where T: MulAssign<T> + Copy {
+
+    fn mul_assign(&mut self, rhs: T) {
+        self.values.iter_mut().for_each(|x| *x *= rhs);
 
     }
 }
