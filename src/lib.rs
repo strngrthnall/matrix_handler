@@ -32,15 +32,16 @@
 //! - **Adição**: `&a + &b` (operador) ou `a.try_add(&b)` (com validação de dimensões).
 //! - **Subtração**: `&a - &b` (operador) ou `a.try_sub(&b)` (com validação de dimensões).
 //! - **Operações in-place**: `a += &b` e `a -= &b` sem alocação extra.
+//! - **Multiplicação matricial**: `a * &b` para produto de matrizes compatíveis.
 //!
 //! ## Roadmap
 //!
-//! - Multiplicação escalar e matricial
+//! - Multiplicação escalar
 //! - Transposição
 //! - Iteradores sobre linhas e colunas
 //! - `Display` formatado
 
-use std::ops::{Add, AddAssign, Index, IndexMut, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Index, IndexMut, Mul, Sub, SubAssign};
 
 /// Erros que podem ocorrer durante operações com matrizes.
 ///
@@ -98,7 +99,7 @@ pub enum MatrixError {
 pub struct Matrix<T> {
     lines: usize,
     columns: usize,
-    values: Vec<T>,
+    pub values: Vec<T>,
 }
 
 impl<T> Matrix<T> {
@@ -226,7 +227,7 @@ impl<T> Matrix<T> where T: Copy {
     ) -> Result<Matrix<T>, MatrixError> where 
         F: Fn(T, T) -> T {
         
-        if self.lines != rhs.lines || self.columns != self.columns {
+        if self.lines != rhs.lines || self.columns != rhs.columns {
             return Err(MatrixError::DimensionMismatch);
         }
 
@@ -270,6 +271,8 @@ impl<T> Add<&Matrix<T>> for &Matrix<T> where T: Add<Output = T> + Copy {
     type Output = Matrix<T>;
 
     fn add(self, rhs: &Matrix<T>) -> Matrix<T> {
+        assert!(self.lines == rhs.lines && self.columns == rhs.columns);
+
         let sum = self.values
             .iter()
             .zip(rhs.values.iter())
@@ -303,6 +306,8 @@ impl<T> Add<&Matrix<T>> for &Matrix<T> where T: Add<Output = T> + Copy {
 /// ```
 impl<T> AddAssign<&Matrix<T>> for Matrix<T> where T: AddAssign<T> + Copy {
     fn add_assign(&mut self, rhs: &Matrix<T>) {
+        assert!(self.lines == rhs.lines && self.columns == rhs.columns);
+
         self.values
             .iter_mut()
             .zip(rhs.values.iter())
@@ -335,6 +340,8 @@ impl<T> Sub<&Matrix<T>> for &Matrix<T> where T: Sub<Output = T> + Copy {
     type Output = Matrix<T>;
 
     fn sub(self, rhs: &Matrix<T>) -> Matrix<T> {
+        assert!(self.lines == rhs.lines && self.columns == rhs.columns);
+
         let sum = self.values
             .iter()
             .zip(rhs.values.iter())
@@ -368,10 +375,82 @@ impl<T> Sub<&Matrix<T>> for &Matrix<T> where T: Sub<Output = T> + Copy {
 /// ```
 impl<T> SubAssign<&Matrix<T>> for Matrix<T> where T: SubAssign<T> + Copy {
     fn sub_assign(&mut self, rhs: &Matrix<T>) {
+        assert!(self.lines == rhs.lines && self.columns == rhs.columns);
+
         self.values
             .iter_mut()
             .zip(rhs.values.iter())
             .for_each(|(val_a, val_b)| *val_a -= *val_b);
+    }
+}
+
+
+/// Multiplicação matricial via operador `*`.
+///
+/// Calcula o produto `self × rhs` utilizando o algoritmo clássico de
+/// multiplicação de matrizes (complexidade $O(n^3)$). A matriz resultante
+/// terá dimensões `self.lines × rhs.columns`.
+///
+/// # Panics
+///
+/// Entra em pânico se `self.columns != rhs.lines` (matrizes incompatíveis
+/// para multiplicação).
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let a = Matrix::new(2, 3, vec![
+///     1, 2, 3,
+///     4, 5, 6,
+/// ]).unwrap();
+///
+/// let b = Matrix::new(3, 2, vec![
+///     7, 8,
+///     9, 10,
+///     11, 12,
+/// ]).unwrap();
+///
+/// let c = a * &b;
+/// // c é 2×2:
+/// // [ 1*7+2*9+3*11, 1*8+2*10+3*12 ]   [ 58,  64 ]
+/// // [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
+/// assert_eq!(c[(0, 0)], 58);
+/// assert_eq!(c[(0, 1)], 64);
+/// assert_eq!(c[(1, 0)], 139);
+/// assert_eq!(c[(1, 1)], 154);
+/// ```
+impl<T> Mul<&Matrix<T>> for Matrix<T> where T: Mul<Output = T> + AddAssign + Copy + Default {
+    type Output = Matrix<T>;
+    
+    fn mul(self, rhs: &Matrix<T>) -> Self::Output {
+        assert_eq!(self.columns, rhs.lines);
+
+        let mut result_values = vec![T::default(); self.lines * rhs.columns ];
+
+        for i in 0..self.lines {
+            for j in 0..rhs.columns {
+                let mut value_buffer = T::default();
+
+                for k in 0..self.columns {
+                    let a_idx = i * self.columns + k; 
+                    let b_idx = k * rhs.columns + j;
+
+                    value_buffer += self.values[a_idx] * rhs.values[b_idx];
+                }
+
+                result_values[i * rhs.columns + j] = value_buffer
+
+            }
+        }
+
+        Matrix {
+            lines: self.lines,
+            columns: rhs.columns,
+            values: result_values
+        }
+
     }
 }
 
@@ -418,6 +497,8 @@ pub trait MatrixMath<Rhs = Self> {
     /// Retorna [`MatrixError::DimensionMismatch`] se as matrizes possuírem
     /// dimensões diferentes.
     fn try_sub(self, rhs: Rhs) -> Result<Self::Output, Self::Error>;
+
+    fn try_mul(self, rhs: Rhs) -> Result<Self::Output, Self::Error>;
     
 }
 
@@ -426,7 +507,7 @@ pub trait MatrixMath<Rhs = Self> {
 /// Requer que `T` implemente `Add`, `Sub` e `Copy`.
 impl<T> MatrixMath<&Matrix<T>> for &Matrix<T> 
 where 
-    T: Add<Output = T> + Sub<Output = T> + Copy 
+    T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy
 {
     type Output = Matrix<T>;
     type Error = MatrixError;
@@ -438,4 +519,9 @@ where
     fn try_sub(self, rhs: &Matrix<T>) -> Result<Matrix<T>, MatrixError> {
         self.try_elementwise_op(rhs, |a, b| a - b)
     }
+
+    fn try_mul(self, rhs: &Matrix<T>) -> Result<Self::Output, Self::Error> {
+        self.try_elementwise_op(rhs, |a, b| a * b)
+    }
 }
+

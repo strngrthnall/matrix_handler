@@ -38,8 +38,8 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 | Indexação por `(linha, coluna)` | ✅ Implementado |
 | Adição de matrizes (`Add` / `AddAssign`) | ✅ Implementado |
 | Subtração de matrizes | ✅ Implementado |
+| Multiplicação matricial | ✅ Implementado |
 | Multiplicação escalar | 🔜 Em breve |
-| Multiplicação matricial | 🔜 Em breve |
 | Transposição | 🔜 Em breve |
 | Iteradores (linhas / colunas) | 🔜 Em breve |
 | `Display` formatado | 🔜 Em breve |
@@ -147,6 +147,31 @@ assert_eq!(c[(1, 1)], 36);
 let mut a = Matrix::new(2, 2, vec![10, 20, 30, 40]).unwrap();
 a -= &b;
 assert_eq!(a[(0, 1)], 18);
+```
+
+### Multiplicação de matrizes
+
+```rust
+use matrix_handler::Matrix;
+
+// A (2×3) × B (3×2) = C (2×2)
+let a = Matrix::new(2, 3, vec![
+    1, 2, 3,
+    4, 5, 6,
+]).unwrap();
+
+let b = Matrix::new(3, 2, vec![
+    7, 8,
+    9, 10,
+    11, 12,
+]).unwrap();
+
+let c = a * &b;
+// Resultado:
+// [ 1*7+2*9+3*11, 1*8+2*10+3*12 ]   [ 58,  64 ]
+// [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
+assert_eq!(c[(0, 0)], 58);
+assert_eq!(c[(1, 1)], 154);
 ```
 
 ## Arquitetura
