@@ -42,7 +42,7 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 | Multiplicação escalar | ✅ Implementado |
 | Transposição | 🔜 Em breve |
 | Iteradores (linhas / colunas) | 🔜 Em breve |
-| `Display` formatado | 🔜 Em breve |
+| `Display` formatado | ✅ Implementado |
 
 ## Início Rápido
 
@@ -172,6 +172,36 @@ let c = a * &b;
 // [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
 assert_eq!(c[(0, 0)], 58);
 assert_eq!(c[(1, 1)], 154);
+```
+
+### Exibição formatada (`Display`)
+
+```rust
+use matrix_handler::Matrix;
+
+let m = Matrix::new(3, 3, vec![
+    1, 2, 3,
+    4, 5, 6,
+    7, 8, 9,
+]).unwrap();
+
+println!("{}", m);
+// Saída:
+//  1 2 3
+//  4 5 6
+//  7 8 9
+```
+
+Valores com larguras diferentes são alinhados automaticamente:
+
+```rust
+use matrix_handler::Matrix;
+
+let m = Matrix::new(2, 2, vec![1, 100, 20, 3]).unwrap();
+println!("{}", m);
+// Saída:
+//    1 100
+//   20   3
 ```
 
 ## Arquitetura

@@ -35,14 +35,14 @@
 //! - **Multiplicação matricial**: `a * &b` para produto de matrizes compatíveis.
 //! - **Multiplicação escalar**: `&a * k` (operador) ou `a *= k` (in-place).
 //! - **Multiplicação matricial in-place**: `a *= &b` sem criar nova matriz.
+//! - **`Display` formatado**: `println!("{}", matrix)` exibe a matriz alinhada em colunas.
 //!
 //! ## Roadmap
 //!
 //! - Transposição
 //! - Iteradores sobre linhas e colunas
-//! - `Display` formatado
 
-use std::{ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign}, process::Output};
+use std::{fmt::Display, ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign}};
 
 /// Erros que podem ocorrer durante operações com matrizes.
 ///
@@ -514,7 +514,6 @@ where
                 }
 
                 result_values[i * rhs.columns + j] = value_buffer
-
             }
         }
 
@@ -647,3 +646,55 @@ where
     }
 }
 
+/// Exibe a matriz formatada com colunas alinhadas à direita.
+///
+/// Cada valor é formatado com largura igual ao maior elemento da matriz,
+/// garantindo alinhamento visual uniforme.
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let m = Matrix::new(3, 3, vec![
+///     1, 2, 3,
+///     4, 5, 6,
+///     7, 8, 9,
+/// ]).unwrap();
+///
+/// let output = format!("{}", m);
+/// assert_eq!(output, " 1 2 3\n 4 5 6\n 7 8 9");
+/// ```
+///
+/// Com valores de larguras diferentes:
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let m = Matrix::new(2, 2, vec![1, 100, 20, 3]).unwrap();
+/// let output = format!("{}", m);
+/// assert_eq!(output, "   1 100\n  20   3");
+/// ```
+impl<T: Display> Display for Matrix<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let max_width = self.values.iter()
+            .map(|v| v.to_string()
+                .len()
+            )
+            .max()
+            .unwrap_or(0);
+        
+        for i in 0..self.lines {
+            for j in 0..self.columns {
+                let value = &self.values[i * self.columns + j];
+                write!(f, " {:>width$}", value, width = max_width)?;
+            }
+            if i < self.lines - 1 {
+                writeln!(f)?;
+            }
+        }
+
+        Ok(())
+    }
+
+}
