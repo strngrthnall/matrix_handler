@@ -1,6 +1,6 @@
 [package]
 name = "matrix_handler"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 authors = ["Marcos Vinicius <viniciusrm.marcos@gmail.com"]
 description = "Uma biblioteca leve e eficiente para manipulação, operações matemáticas e transformação de matrizes em Rust. Focada em performance e simplicidade de interface."
