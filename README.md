@@ -255,5 +255,5 @@ Este projeto está licenciado sob a [Licença MIT](LICENSE).
 ---
 
 <p align="center">
-  Feito com 🦀 e Rust
+  Feito com 🦀 Rust
 </p>
