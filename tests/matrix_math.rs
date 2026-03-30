@@ -88,6 +88,54 @@ mod matrix_math{
         assert_eq!(m3.values, [7, 10, 15, 22])
     }
 
+    #[test]
+    fn matrix_scalar_multiplication() {
+        let m1 = Matrix::new(2, 2, vec![1,2,3,4]).unwrap();
+       
+
+       let m2 = &m1 * 3;
+
+        assert_eq!(m2.values, [3, 6, 9, 12])
+    }
+
+    #[test]
+    fn matrix_multiplication_assign() {
+        let mut m1 = Matrix::new(2, 2, vec![1,2,3,4]).unwrap();
+        let m2 = Matrix::new(2, 2, vec![1,2,3,4]).unwrap();
+
+        m1 *= &m2;
+
+        assert_eq!(m1.values, [7, 10, 15, 22])
+    }
+
+    #[test]
+    fn matrix_scalar_multiplication_assign() {
+        let mut m1 = Matrix::new(2, 2, vec![1,2,3,4]).unwrap();
+       
+
+        m1 *= 3;
+
+        assert_eq!(m1.values, [3, 6, 9, 12])
+    }
+
+    #[test]
+    fn matrix_division() {
+        let m1 = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+
+        let m3 = &m1 / 3;
+
+        assert_eq!(m3.values, [1, 2, 3, 4])
+    }
+
+    #[test]
+    fn matrix_division_assign() {
+        let mut m1 = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+
+        m1 /= 3;
+
+        assert_eq!(m1.values, [1, 2, 3, 4])
+    }
+
 
     #[test]
     #[should_panic(expected = "assertion `left == right` failed")]

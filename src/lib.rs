@@ -42,7 +42,7 @@
 //! - Transposição
 //! - Iteradores sobre linhas e colunas
 
-use std::{fmt::Display, ops::{Add, AddAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign}};
+use std::{fmt::Display, ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign}};
 
 /// Erros que podem ocorrer durante operações com matrizes.
 ///
@@ -577,6 +577,60 @@ impl<T> MulAssign<T> for Matrix<T> where T: MulAssign<T> + Copy {
 
     fn mul_assign(&mut self, rhs: T) {
         self.values.iter_mut().for_each(|x| *x *= rhs);
+
+    }
+}
+
+/// Divisão escalar via operador `/`.
+///
+/// Permite a sintaxe `&a / k`, onde a referência é consumida e uma nova
+/// [`Matrix<T>`] é produzida com cada elemento multiplicado pelo escalar.
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let a = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+///
+/// let b = &a / 3;
+/// assert_eq!(b[(0, 0)], 1);
+/// assert_eq!(b[(1, 1)], 4);
+/// ```
+impl<T> Div<T> for &Matrix<T> where T: Div<Output = T> + Copy {
+    type Output = Matrix<T>;
+
+    fn div(self, rhs: T) -> Self::Output {
+        let val = self.values.iter().map(|&x| x / rhs).collect();
+        
+        Matrix {
+            lines: self.lines,
+            columns: self.columns,
+            values: val
+        }
+    }
+}
+
+/// Divisão escalar in-place via operador `/=`.
+///
+/// Modifica `self` diretamente multiplicando cada elemento pelo escalar,
+/// evitando alocação de uma nova matriz.
+///
+/// # Exemplos
+///
+/// ```rust
+/// use matrix_handler::Matrix;
+///
+/// let mut a = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+///
+/// a /= 3;
+/// assert_eq!(a[(0, 0)], 1);
+/// assert_eq!(a[(1, 1)], 4);
+/// ```
+impl<T> DivAssign<T> for Matrix<T> where T: DivAssign<T> + Copy {
+
+    fn div_assign(&mut self, rhs: T) {
+        self.values.iter_mut().for_each(|x| *x /= rhs);
 
     }
 }
