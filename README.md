@@ -52,7 +52,7 @@ O projeto ainda vai ser carregado ao crates.io, por enquanto para utilizar deve-
 
 ```toml
 [dependencies]
-matrix_handler = "0.1.0"
+matrix_handler = "0.1.1"
 ```
 
 ### Criando uma matriz
