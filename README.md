@@ -39,7 +39,7 @@ Matriz 3×3 lógica:          Armazenamento interno (Vec<T>):
 | Adição de matrizes (`Add` / `AddAssign`) | ✅ Implementado |
 | Subtração de matrizes | ✅ Implementado |
 | Multiplicação matricial | ✅ Implementado |
-| Multiplicação escalar | ✅ Implementado |
+| Multiplicação / Divisão escalar | ✅ Implementado |
 | Transposição | 🔜 Em breve |
 | Iteradores (linhas / colunas) | 🔜 Em breve |
 | `Display` formatado | ✅ Implementado |
@@ -52,7 +52,7 @@ O projeto ainda vai ser carregado ao crates.io, por enquanto para utilizar deve-
 
 ```toml
 [dependencies]
-matrix_handler = "0.1.1"
+matrix_handler = "0.1.2"
 ```
 
 ### Criando uma matriz
@@ -172,6 +172,85 @@ let c = a * &b;
 // [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
 assert_eq!(c[(0, 0)], 58);
 assert_eq!(c[(1, 1)], 154);
+```
+
+ou
+
+```rust
+use matrix_handler::Matrix;
+
+// A (2×3) × B (3×2)
+let mut a = Matrix::new(2, 3, vec![
+    1, 2, 3,
+    4, 5, 6,
+]).unwrap();
+
+let b = Matrix::new(3, 2, vec![
+    7, 8,
+    9, 10,
+    11, 12,
+]).unwrap();
+
+a *= &b;
+// Resultado:
+// [ 1*7+2*9+3*11, 1*8+2*10+3*12 ]   [ 58,  64 ]
+// [ 4*7+5*9+6*11, 4*8+5*10+6*12 ] = [ 139, 154 ]
+assert_eq!(c[(0, 0)], 58);
+assert_eq!(c[(1, 1)], 154);
+```
+
+### Multiplicação Escalar
+
+```rust
+use matrix_handler::Matrix;
+
+let mut a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+
+a = &a * 3;
+// Resultado:
+// [ 1*3, 2*3 ]   [ 3,  6 ]
+// [ 3*3, 4*3 ] = [ 9, 12 ]
+assert_eq!(c[(0, 0)], 3);
+assert_eq!(c[(1, 1)], 12);
+```
+
+ou
+
+```rust
+use matrix_handler::Matrix;
+
+let mut a = Matrix::new(2, 2, vec![1, 2, 3, 4]).unwrap();
+
+&a *= 3;
+// Resultado:
+// [ 1*3, 2*3 ]   [ 3,  6 ]
+// [ 3*3, 4*3 ] = [ 9, 12 ]
+assert_eq!(c[(0, 0)], 3);
+assert_eq!(c[(1, 1)], 12);
+```
+
+### Divisão Escalar
+
+```rust
+use matrix_handler::Matrix;
+
+let a = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+
+let b = &a / 3;
+assert_eq!(b[(0, 0)], 1);
+assert_eq!(b[(1, 1)], 4);
+```
+
+ou
+
+```rust
+use matrix_handler::Matrix;
+
+let mut a = Matrix::new(2, 2, vec![3, 6, 9, 12]).unwrap();
+
+a /= 3;
+assert_eq!(b[(0, 0)], 1);
+assert_eq!(b[(1, 1)], 4);
 ```
 
 ### Exibição formatada (`Display`)
