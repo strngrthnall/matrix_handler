@@ -5,7 +5,7 @@
   </p>
   <p align="center">
     <img src="https://img.shields.io/badge/rust-2024_edition-orange?logo=rust" alt="Rust Edition">
-    <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version">
+    <img src="https://img.shields.io/badge/version-0.1.2-blue" alt="Version">
     <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
     <img src="https://img.shields.io/badge/status-em_desenvolvimento-yellow" alt="Status">
   </p>
